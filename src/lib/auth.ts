@@ -1,34 +1,8 @@
-import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-import { SignupSchema } from "@/utils/types";
-import prisma from "@/lib/prisma";
 
-export const NEXT_AUTH = {
+const NEXT_AUTH = {
   providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        username: {
-          label: "name",
-          type: "text",
-          placeholder: "Enter your name here",
-        },
-        email: {
-          label: "email",
-          type: "text",
-          placeholder: "Enter your email here",
-        },
-        password: {
-          label: "password",
-          type: "password",
-          placeholder: "Enter your password",
-        },
-      },
-      async authorize(credentials: any) {
-        console.log(credentials);
-      },
-    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
@@ -57,3 +31,5 @@ export const NEXT_AUTH = {
   //   },
   // },
 };
+
+export { NEXT_AUTH };
