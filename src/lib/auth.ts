@@ -26,30 +26,7 @@ export const NEXT_AUTH = {
         },
       },
       async authorize(credentials: any) {
-        console.log("user created ");
-        const { username, email, password } = credentials;
-        if (!username || !email || !password) return false;
-
-        const { success } = SignupSchema.safeParse({
-          username,
-          email,
-          password,
-        });
-        if (!success) return false;
-
-        try {
-          const user = await prisma.user.create({
-            data: {
-              email,
-              name: username,
-              password,
-            },
-          });
-          return user;
-        } catch (error) {
-          console.error("Error creating user:", error);
-          return null;
-        }
+        console.log(credentials);
       },
     }),
     GoogleProvider({
@@ -63,7 +40,7 @@ export const NEXT_AUTH = {
   ],
   secret: process.env.NEXT_SECRET,
   pages: {
-    signUp: "/signup", // Ensure this matches your Next.js page route
+    signIn: "/signin", // Ensure this matches your Next.js page route
   },
 
   // Uncomment and modify as needed

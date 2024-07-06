@@ -9,7 +9,8 @@ export default function Home() {
   const session = useSession(NEXT_AUTH);
   const router = useRouter();
   const handler = () => {
-    signOut({ callbackUrl: "/signup " });
+    signOut({ callbackUrl: "/signin " });
+    // if(session.status==='unauthenticated') router.push('/signup');
     // router.push('/api/auth/signin');
   };
   return (
@@ -19,6 +20,7 @@ export default function Home() {
         {JSON.stringify(session)}
       </div>
       <Button onClick={handler}>Signout</Button>
+      <Button onClick={() => router.push("/signin")}>Signin</Button>
     </ProtectedRoute>
   );
 }
