@@ -10,8 +10,6 @@ export default function Home() {
   const router = useRouter();
   const handler = () => {
     signOut({ callbackUrl: "/signin " });
-    // if(session.status==='unauthenticated') router.push('/signup');
-    // router.push('/api/auth/signin');
   };
   return (
     <ProtectedRoute>
