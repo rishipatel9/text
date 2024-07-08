@@ -1,6 +1,8 @@
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
+import { PrismaClient } from "@prisma/client";
 
+const prisma=new PrismaClient();
 const NEXT_AUTH = {
   providers: [
     GoogleProvider({
@@ -30,6 +32,19 @@ const NEXT_AUTH = {
       return token;
     },
   },
+  events: {
+    async signIn({ user, isNewUser }:{user:any,isNewUser:any}) {
+      if (isNewUser) {
+        // Create a new user in your database
+        await prisma.user.create({
+          data: {
+            email: user.email || '',
+            name: user.name || '',
+          },
+        });
+      }
+    },
+  }
 };
 
 export { NEXT_AUTH };
