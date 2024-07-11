@@ -1,89 +1,106 @@
 'use client';
+import { useState, useEffect } from 'react';
+import useWebSocket from '../../lib/websocket';
 
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+const Chat = () => {
+  const { messages, sendMessage } = useWebSocket('ws://localhost:4000');
+  const [input, setInput] = useState<string>('');
+  const [channel, setChannel] = useState<string>('');
+  const [username,setUsername] = useState<string>('');
 
-const Page = () => {
-    const [message, setMessage] = useState("");
-    const [recipientId, setRecipientId] = useState("");
-    const [userId, setUserId] = useState("");
-    const [socket, setSocket] = useState<WebSocket | null>(null);
-    const [chats, setChats] = useState<string[]>([]);
+  useEffect(() => {
+    // Example of subscribing to a default channel when component mounts
+    // setChannel('');
+    sendMessage({ type: 'subscribe', channel: 'default' });
 
-    useEffect(() => {
-        // Establish WebSocket connection when component mounts
-        const newSocket = new WebSocket('ws://localhost:8080');
-        
-
-        // WebSocket event listeners
-        newSocket.onopen = () => {
-            console.log('Connection established');
-        };
-        
-        newSocket.onmessage = (event) => {
-            try {
-                const messageData = JSON.parse(event.data);
-                if (messageData.type === 'user-id') {
-                    setUserId(messageData.userId); // Save user ID for reference
-                } else {
-                    console.log('Message received:', messageData);
-                    setChats((prevChats) => [...prevChats, messageData]);
-                }
-            } catch (error) {
-                console.error('Failed to parse message', error);
-            }
-        };
-
-        // Set the socket state and close the connection when the component unmounts
-        setSocket(newSocket);
-        return () => {
-            
-            newSocket.close();
-            console.log('Connection closed');
-        };
-    }, []);
-
-    const handleSend = () => {
-        if (socket && message.trim() !== "" && recipientId.trim() !== "") {
-            const messageObject = {
-                recipient: recipientId,
-                content: message
-            };
-            socket.send(JSON.stringify(messageObject));
-            setMessage('');
-        }
+    return () => {
+      sendMessage({ type: 'unsubscribe', channel: 'default' });
     };
+  }, [sendMessage]);
 
-    return (
-        <div className="flex items-center justify-center h-screen bg-background">
-            <div className="w-full max-w-md p-8 space-y-4 bg-card rounded-lg shadow-lg">
-                <p>Your ID: {userId}</p>
-                <input
-                    type="text"
-                    placeholder="Recipient ID"
-                    className="bg-slate-100 rounded-md shadow-sm h-10 m-5 p-1"
-                    value={recipientId}
-                    onChange={(event) => setRecipientId(event.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Message"
-                    className="bg-slate-100 rounded-md shadow-sm h-10 m-5 p-1"
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                />
-                <Button onClick={handleSend}>Send</Button>
-            </div>
-            <div className="w-full max-w-md p-8 space-y-4 bg-card rounded-lg shadow-lg">
-                <h1>Chats</h1>
-                <ul>
-                    {chats.map((chat, index) => (
-                        <li key={index}>{chat.content}</li>
-                    ))}
-                </ul>
-            </div>
+  const handleSendMessage = () => {
+    if (channel && input) {
+      sendMessage({ type: 'sendMessage', channel, message: input });
+      setInput('');
+    }
+  };
+
+  const handleSubscribe = () => {
+    if (channel) {
+      sendMessage({ type: 'subscribe', channel });
+    }
+  };
+
+  const handleUnsubscribe = () => {
+    if (channel) {
+      sendMessage({ type: 'unsubscribe', channel });
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Chat App</h1>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Channel"
+          value={username}
+          onChange={(event)=>setUsername(event.target.value)}
+          className="border rounded px-3 py-2 mr-2"
+        />
+        <button
+          onClick={handleSubscribe}
+          className="bg-yellow-500 text-white px-3 py-2 rounded mr-2"
+        >
+          set username
+        </button>
         </div>
-    );
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Channel"
+          value={channel}
+          onChange={(e) => setChannel(e.target.value)}
+          className="border rounded px-3 py-2 mr-2"
+        />
+        <button
+          onClick={handleSubscribe}
+          className="bg-blue-500 text-white px-3 py-2 rounded mr-2"
+        >
+          Subscribe
+        </button>
+        <button
+          onClick={handleUnsubscribe}
+          className="bg-red-500 text-white px-3 py-2 rounded"
+        >
+          Unsubscribe
+        </button>
+      </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="border rounded px-3 py-2 mr-2"
+        />
+        <button
+          onClick={handleSendMessage}
+          className="bg-green-500 text-white px-3 py-2 rounded"
+        >
+          Send
+        </button>
+      </div>
+      <div>
+        <h2 className="text-xl font-bold mb-2">Messages</h2>
+        <ul className="list-disc pl-5">
+          {messages.map((message, index) => (
+            <li key={index} className="mb-1">{message}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 };
 
-export default Page;
+export default Chat;

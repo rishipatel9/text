@@ -1,52 +1,106 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { v4 as uuidv4 } from 'uuid';
+import express from 'express';
+import http from 'http';
+import WebSocket from 'ws';
+import  { createClient } from 'redis';
 
-interface MessageData {
-    recipient: string;
-    content: string;
-    sender:string
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+const subscriber = createClient();
+const publisher = createClient();
+const createConnection = async ()=>{
+    try{
+        await publisher.connect();
+        await subscriber.connect();
+        console.log("Redis connected");
+    }catch(err){
+        console.error("Failed to connect to Redis",err);
+    }
+}
+createConnection();
+const port = process.env.PORT || 4000;
+
+interface WebSocketWithChannels extends WebSocket {
+  channels: Set<string>;
 }
 
-const server = createServer((request: IncomingMessage, response: ServerResponse) => {
-    console.log((new Date()) + ' Received request for ' + request.url);
-    response.end("Hi there!");
-});
+const clientChannels = new Map<WebSocketWithChannels, Set<string>>();
 
-const wss = new WebSocketServer({ server });
-const clients = new Map<string, WebSocket>(); // Map to store user IDs and WebSocket instances
 
-wss.on('connection', (ws: WebSocket) => {
-    // Assign a unique ID to the user for this connection
+wss.on('connection', async (ws: WebSocketWithChannels) => {
+  ws.channels = new Set();
 
-    
-    // Send the user their unique ID (could be used for client-side reference)
-    // ws.send(JSON.stringify({ type: 'user-id', userId }));
-    
-    ws.on('message', (message: string) => {
-      try {
-        const data: MessageData = JSON.parse(userId,message);
-        console.log(`User connected with ID: ${userId}`);
-            const { recipient, content , } = data;
-            console.log(`Message from ${userId} to ${recipient}: ${content}`);
+  ws.on('message', (message: string) => {
+    const parsedMessage = JSON.parse(message);
 
-            if (clients.has(recipient)) {
-                clients.get(recipient)?.send(content);
-            } else {
-                console.log(`Recipient ${recipient} is not connected.`);
-            }
-        } catch (error) {
-            console.error('Failed to parse message', error);
+    if (parsedMessage.type === 'subscribe') {
+      const { channel } = parsedMessage;
+      console.log(`Subscribed to ${channel}`);
+      subscriber.subscribe(channel, (err, count) => {
+        if (err) {
+          console.error(`Failed to subscribe: ${err}`);
+        } else {
+          console.log(`Subscribed to ${count} channel(s).`);
         }
-    });
+      });
+      ws.channels.add(channel);
+      clientChannels.set(ws, ws.channels);
+    }
 
-    ws.on('close', () => {
-        // Remove client from clients map on close
-        clients.delete(userId);
-        console.log(`User ${userId} disconnected.`);
+    if (parsedMessage.type === 'unsubscribe') {
+      const { channel } = parsedMessage;
+      console.log(`Unsubscribed from ${channel}`);
+      subscriber.unsubscribe(channel, (err, count) => {
+        if (err) {
+          console.error(`Failed to unsubscribe: ${err}`);
+        } else {
+          console.log(`Unsubscribed from ${count} channel(s).`);
+        }
+      });
+      ws.channels.delete(channel);
+      if (ws.channels.size === 0) {
+        clientChannels.delete(ws);
+      } else {
+        clientChannels.set(ws, ws.channels);
+      }
+    }
+
+    if (parsedMessage.type === 'sendMessage') {
+      const { channel, message } = parsedMessage;
+      console.log(`Sending message to ${channel}: ${message}`);
+      publisher.publish(channel, message);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    clientChannels.delete(ws);
+    ws.channels.forEach((channel) => {
+      subscriber.unsubscribe(channel, (err, count) => {
+        if (err) {
+          console.error(`Failed to unsubscribe: ${err}`);
+        } else {
+          console.log(`Unsubscribed from ${count} channel(s).`);
+        }
+      });
     });
+  });
 });
 
-server.listen(8080, () => {
-    console.log((new Date()) + ' Server is listening on port 8080');
+subscriber.on('message', (channel: string, message: string) => {
+  wss.clients.forEach((client) => {
+    const typedClient = client as WebSocketWithChannels;
+    if (
+      clientChannels.has(typedClient) &&
+      clientChannels.get(typedClient)!.has(channel) &&
+      typedClient.readyState === WebSocket.OPEN
+    ) {
+      typedClient.send(message);
+    }
+  });
+});
+
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
