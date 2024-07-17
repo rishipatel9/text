@@ -14,14 +14,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
-const ws_1 = __importDefault(require("ws"));
+const ws_1 = require("ws");
 const redis_1 = require("redis");
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
-const wss = new ws_1.default.Server({ server });
+const wss = new ws_1.WebSocketServer({ server });
+const port = process.env.PORT || 4000;
 const subscriber = (0, redis_1.createClient)();
 const publisher = (0, redis_1.createClient)();
-const createConnection = () => __awaiter(void 0, void 0, void 0, function* () {
+(() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield publisher.connect();
         yield subscriber.connect();
@@ -30,80 +31,34 @@ const createConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     catch (err) {
         console.error("Failed to connect to Redis", err);
     }
-});
-createConnection();
-const port = process.env.PORT || 4000;
-const clientChannels = new Map();
-// (async () => {
-//   await subscriber.connect();
-//   await publisher.connect();
-// })();
-wss.on('connection', (ws) => __awaiter(void 0, void 0, void 0, function* () {
-    ws.channels = new Set();
-    ws.on('message', (message) => {
-        const parsedMessage = JSON.parse(message);
-        if (parsedMessage.type === 'subscribe') {
-            const { channel } = parsedMessage;
-            console.log(`Subscribed to ${channel}`);
-            subscriber.subscribe(channel, (err, count) => {
-                if (err) {
-                    console.error(`Failed to subscribe: ${err}`);
-                }
-                else {
-                    console.log(`Subscribed to ${count} channel(s).`);
-                }
+}))();
+wss.on('connection', (ws) => {
+    console.log('New Client Connection');
+    ws.on('message', (message) => __awaiter(void 0, void 0, void 0, function* () {
+        const data = JSON.parse(message);
+        if (data.type === 'SUBSCRIBE') {
+            const { channel } = data;
+            yield subscriber.SUBSCRIBE(channel, (message) => {
+                console.log(`Recievd message ${message} on ${channel}`);
+                ws.send(message);
             });
-            ws.channels.add(channel);
-            clientChannels.set(ws, ws.channels);
         }
-        if (parsedMessage.type === 'unsubscribe') {
-            const { channel } = parsedMessage;
-            console.log(`Unsubscribed from ${channel}`);
-            subscriber.unsubscribe(channel, (err, count) => {
-                if (err) {
-                    console.error(`Failed to unsubscribe: ${err}`);
-                }
-                else {
-                    console.log(`Unsubscribed from ${count} channel(s).`);
-                }
-            });
-            ws.channels.delete(channel);
-            if (ws.channels.size === 0) {
-                clientChannels.delete(ws);
-            }
-            else {
-                clientChannels.set(ws, ws.channels);
-            }
+        else if (data.type === 'PUBLISH') {
+            const { channel, message } = data;
+            yield publisher.PUBLISH(channel, message);
+            console.log(`PUBLISHED ${message} TO ${channel}`);
         }
-        if (parsedMessage.type === 'sendMessage') {
-            const { channel, message } = parsedMessage;
-            console.log(`Sending message to ${channel}: ${message}`);
-            publisher.publish(channel, message);
+        else if (data.type === 'UNSUBSCRIBE') {
+            const { channel } = data;
+            yield subscriber.UNSUBSCRIBE(channel);
+            console.log(`UBSUBSCRIBED ${channel}`);
         }
-    });
+        else {
+            console.log(data);
+        }
+    }));
     ws.on('close', () => {
         console.log('Client disconnected');
-        clientChannels.delete(ws);
-        ws.channels.forEach((channel) => {
-            subscriber.unsubscribe(channel, (err, count) => {
-                if (err) {
-                    console.error(`Failed to unsubscribe: ${err}`);
-                }
-                else {
-                    console.log(`Unsubscribed from ${count} channel(s).`);
-                }
-            });
-        });
-    });
-}));
-subscriber.on('message', (channel, message) => {
-    wss.clients.forEach((client) => {
-        const typedClient = client;
-        if (clientChannels.has(typedClient) &&
-            clientChannels.get(typedClient).has(channel) &&
-            typedClient.readyState === ws_1.default.OPEN) {
-            typedClient.send(message);
-        }
     });
 });
 server.listen(port, () => {
