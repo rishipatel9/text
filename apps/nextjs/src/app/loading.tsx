@@ -1,14 +1,12 @@
 import { Button } from '@/components/ui/moving-border'
 import React from 'react'
 
-const loading = () => {
+const Loading = () => {
   return (
-    <div>
-      <Button>
-        hello
-      </Button>
+    <div className='h-[100vh] w-[100vw] bg-black'>
+      <Button children={undefined}></Button>
     </div>
   )
 }
 
-export default loading
+export default Loading
