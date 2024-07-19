@@ -1,9 +1,11 @@
-import GoogleProvider from "next-auth/providers/google";
-import GithubProvider from "next-auth/providers/github";
 import { PrismaClient } from "@prisma/client";
 
-const prisma=new PrismaClient();
-const NEXT_AUTH = {
+import GoogleProvider from "next-auth/providers/google";
+import GithubProvider from "next-auth/providers/github";
+
+const prisma = new PrismaClient();
+
+const NEXT_AUTH = ({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -33,18 +35,26 @@ const NEXT_AUTH = {
     },
   },
   events: {
-    async signIn({ user, isNewUser }:{user:any,isNewUser:any}) {
+    async signIn({ user, account, isNewUser }: { user: any; account: any; isNewUser?: boolean }) {
       if (isNewUser) {
-        // Create a new user in your database
-        await prisma.user.create({
-          data: {
-            email: user.email || '',
-            name: user.name || '',
-          },
-        });
+        try {
+          console.log("New user sign-in detected:", user);
+          await prisma.user.create({
+            data: {
+              email: user.email || '',
+              name: user.name || '',
+              image: user.image || '',
+              provider: account.provider,
+              providerId: account.providerAccountId,
+            },
+          });
+          console.log("User created successfully");
+        } catch (error) {
+          console.error("Error creating user:", error);
+        }
       }
     },
-  }
-};
+  },
+});
 
 export { NEXT_AUTH };
