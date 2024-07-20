@@ -16,6 +16,8 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const ws_1 = require("ws");
 const redis_1 = require("redis");
+const client_1 = require("@prisma/client");
+const prisma = new client_1.PrismaClient();
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const wss = new ws_1.WebSocketServer({ server });
@@ -38,10 +40,10 @@ wss.on('connection', (ws) => {
         const data = JSON.parse(message);
         if (data.type === 'SUBSCRIBE') {
             const { channel } = data;
-            yield subscriber.SUBSCRIBE(channel, (message) => {
+            yield subscriber.SUBSCRIBE(channel, (message) => __awaiter(void 0, void 0, void 0, function* () {
                 console.log(`Recievd message ${message} on ${channel}`);
                 ws.send(message);
-            });
+            }));
         }
         else if (data.type === 'PUBLISH') {
             const { channel, message } = data;

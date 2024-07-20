@@ -1,7 +1,10 @@
 import express from 'express';
 import http from 'http';
-import WebSocket, { WebSocketServer } from 'ws';
+import  { WebSocketServer } from 'ws';
 import { createClient  } from 'redis';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const app = express();
 const server = http.createServer(app);
@@ -9,6 +12,7 @@ const wss = new WebSocketServer({ server });
 const port = process.env.PORT || 4000;
 const subscriber = createClient();
 const publisher = createClient();
+
 
 
 ( async () => {
@@ -22,7 +26,6 @@ const publisher = createClient();
 })();
 
 
-
 wss.on('connection', (ws) => {
     console.log('New Client Connection')
 
@@ -31,9 +34,10 @@ wss.on('connection', (ws) => {
         const data = JSON.parse(message);
         if(data.type==='SUBSCRIBE'){
             const { channel }=data;
-            await subscriber.SUBSCRIBE(channel,(message)=>{
+            await subscriber.SUBSCRIBE(channel,async (message)=>{
                 console.log(`Recievd message ${message} on ${channel}`);
                 ws.send(message);
+                
             })
         }
         else if(data.type==='PUBLISH'){

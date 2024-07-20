@@ -26,8 +26,10 @@ const config: Config = {
   darkmode: "class",
   theme: {
     extend: {
+      
       animation: {
         "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+        "shimmer": "shimmer 2s linear infinite"
       },
       keyframes: {
         "border-beam": {
@@ -35,6 +37,14 @@ const config: Config = {
             "offset-distance": "100%",
           },
         },
+        "shimmer": {
+          from: {
+            "backgroundPosition": "0 0"
+          },
+          to: {
+            "backgroundPosition": "-200% 0"
+          }
+        }
       },
       boxShadow: {
         'custom': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
