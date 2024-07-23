@@ -1,9 +1,7 @@
-"use client"
-import SignupFormDemo from '@/components/Signin/Signin'
+"use client";
+import SignupFormDemo from "@/components/Signin/Signin";
 const page = () => {
-  return (
-      <SignupFormDemo/>
-  )
-}
+  return <SignupFormDemo />;
+};
 
-export default page
+export default page;

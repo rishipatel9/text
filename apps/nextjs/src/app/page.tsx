@@ -1,10 +1,9 @@
-import Chats from "@/components/Home/Chats"
-import React from 'react'
+
+import Chats from "@/components/Home/Chats";
+import React from "react";
 
 const page = () => {
-  return (
-    <Chats/>
-  )
-}
+  return <Chats />;
+};
 
-export default page
+export default page;

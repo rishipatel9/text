@@ -1,27 +1,28 @@
-// Import necessary modules and components
 import React, { useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "../magicui/border-beam";
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import BlurIn from "../magicui/blur-in";
 
 export function SignupFormDemo() {
   const { data: session, status } = useSession();
-    const router = useRouter();
-    useEffect(()=>{
-      if(session) router.push('/');
-    },[session,status]);
+  const router = useRouter();
+  useEffect(() => {
+    if (session) router.push("/");
+  }, [session, status]);
   return (
     <div className="h-[50em] w-full bg-black bg-grid-white/[0.2]  relative flex items-center justify-center overflow-hidden">
       <div className="absolute pointer-events-none inset-0 flex items-center justify- bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
       <div className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8">
-
         <div className="max-w-md w-full mx-auto rounded-xl md:rounded-2xl md:p-8  ">
           <BorderBeam />
-          <BlurIn word=" Welcome to text." className="text-4xl sm:text-6xl text-center font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-2"/>
+          <BlurIn
+            word=" Welcome to text."
+            className="text-4xl sm:text-6xl text-center font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-2"
+          />
           <p className=" font-normal text-sm max-w-sm text-center mt-2 text-neutral-300 from-neutral-200 to-neutral-500">
             Login to text. if you can because we don't have a login flow yet.
           </p>
@@ -46,15 +47,12 @@ export function SignupFormDemo() {
               <BottomGradient />
             </button>
           </div>
-
         </div>
       </div>
-
     </div>
   );
 }
 
-// BottomGradient component for gradient effect
 const BottomGradient = () => (
   <>
     <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
@@ -62,11 +60,4 @@ const BottomGradient = () => (
   </>
 );
 
-// LabelInputContainer component for input containers
-// const LabelInputContainer = ({ children, className }: { children: React.ReactNode; className?: string; }) => (
-//   <div className={cn("flex flex-col space-y-2 w-full", className)}>
-//     {children}
-//   </div>
-// );
-
-export default SignupFormDemo; 
+export default SignupFormDemo;

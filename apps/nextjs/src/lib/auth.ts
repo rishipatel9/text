@@ -2,7 +2,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import prisma from "./prisma";
 
-const NEXT_AUTH = ({
+const NEXT_AUTH = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -32,34 +32,34 @@ const NEXT_AUTH = ({
     },
   },
   events: {
-    async signIn({ user, account }: { user: any; account: any;  }) {
+    async signIn({ user, account }: { user: any; account: any }) {
       // console.log("SignIn event triggered");
       // console.log("User:", user);
       // console.log("Account:", account);
-        try {
-          // console.log("user sign-in detected:", user);
-          const ifExists = await prisma.user.findFirst({
-            where:{
-              email:user.email
-            }
-          })
-          if(!ifExists){
-            await prisma.user.create({
-              data: {
-                email: user.email || '',
-                name: user.name || '',
-                image: user.image || '',
-                provider: account.provider,
-                providerId: account.providerAccountId,
-              },
-            });
-            console.log("User created successfully");
-          }
-        } catch (error) {
-          console.error("Error creating user : ", error);
+      try {
+        // console.log("user sign-in detected:", user);
+        const ifExists = await prisma.user.findFirst({
+          where: {
+            email: user.email,
+          },
+        });
+        if (!ifExists) {
+          await prisma.user.create({
+            data: {
+              email: user.email || "",
+              name: user.name || "",
+              image: user.image || "",
+              provider: account.provider,
+              providerId: account.providerAccountId,
+            },
+          });
+          console.log("User created successfully");
         }
+      } catch (error) {
+        console.error("Error creating user : ", error);
+      }
     },
   },
-});
+};
 
 export { NEXT_AUTH };
