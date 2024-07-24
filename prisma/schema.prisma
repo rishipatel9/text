@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,12 +8,45 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  name          String?
-  image         String?
-  provider      String?
-  providerId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  name         String?
+  image        String?
+  provider     String?
+  providerId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[] @relation("MessageSender")
+  chats        Chat[]    @relation("ChatUsers")
+  readMessages Message[] @relation("MessageReadBy")
+
+  Chat Chat[] @relation("ChatAdmin")
+}
+
+model Chat {
+  id              Int       @id @default(autoincrement())
+  chatName        String?
+  isGroupChat     Boolean   @default(false)
+  users           User[]    @relation("ChatUsers")
+  latestMessage   Message?  @relation("LatestMessage", fields: [latestMessageId], references: [id])
+  latestMessageId Int?
+  groupAdmin      User?     @relation("ChatAdmin", fields: [groupAdminId], references: [id])
+  groupAdminId    Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  messages        Message[] @relation("ChatMessages")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id])
+  senderId  Int
+  content   String
+  chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id])
+  chatId    Int
+  readBy    User[]   @relation("MessageReadBy")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Chat Chat[] @relation("LatestMessage")
 }
