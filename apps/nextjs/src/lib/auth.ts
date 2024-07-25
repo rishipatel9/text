@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import prisma from "./prisma";
+import { sendEmail } from "@/utils/email";
 
 const NEXT_AUTH = {
   providers: [
@@ -37,13 +38,14 @@ const NEXT_AUTH = {
       // console.log("User:", user);
       // console.log("Account:", account);
       try {
-        // console.log("user sign-in detected:", user);
         const ifExists = await prisma.user.findFirst({
           where: {
             email: user.email,
           },
         });
         if (!ifExists) {
+          await sendWelcomeEmail(user);
+          console.log("Welcome email sent");
           await prisma.user.create({
             data: {
               email: user.email || "",
@@ -61,5 +63,12 @@ const NEXT_AUTH = {
     },
   },
 };
+async function sendWelcomeEmail(user: any) {
+  const { email, name } = user;
+  const subject = "Welcome to Our Service!";
+  const text = `Hello ${name},\n\nWelcome to our service! We are glad to have you on board.\n\nBest regards,\nThe Team`;
+  const html = `<p>Hello ${name},</p><p>Welcome to our service! We are glad to have you on board.</p><p>Best regards,<br>The Team</p>`;
 
+  await sendEmail({ to: email, subject, text, html });
+}
 export { NEXT_AUTH };

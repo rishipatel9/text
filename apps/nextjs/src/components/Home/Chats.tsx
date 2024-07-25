@@ -24,15 +24,15 @@ export default function Chats() {
     } else {
       loadingBarRef.current.complete(); // Complete loading when session is available
     }
+    
+    // const handleResize = () => {
+    //   setIsMobile(window.innerWidth <= 640);
+    // };
 
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    // window.addEventListener("resize", handleResize);
+    // handleResize(); // Initial check
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
 
-    return () => window.removeEventListener("resize", handleResize);
   }, [session, status]);
 
   const handleSignOut = async () => {
@@ -57,13 +57,16 @@ export default function Chats() {
     { imageUrl: session?.user?.image, name: "Chris Evans", lastMessage: "How are you?" },
   ];
 
-  const displayChats = (imageUrl: string, name: string) => {
+  const displayChats =async  (imageUrl: string, name: string) => {
+    const res=await fetch(`/api/user?search=${name}`)
+    const data=await res.json()
+    console.log(data)
     setUsername(name);
     setProfileImage(imageUrl);
   };
 
   return (
-    <div className="h-[100vh] w-[100vw] sm:flex bg-[#27272B]">
+    <div className={`h-[100vh] w-[100vw] sm:flex ${isMobile ? "bg-slate-50 " :"bg-[#27272B]"}`}>
       <LoadingBar color="white" ref={loadingBarRef} />
       <div className="sm:w-[25%] bg-black sm:m-2 sm:rounded-custom sm:overflow-scroll w-full border-custom">
         <UserProfileCard
@@ -80,7 +83,7 @@ export default function Chats() {
         </form>
         {profiles.map((profile, index) => (
           <div
-            onClick={() => { displayChats(profile?.imageUrl, profile?.name) }}
+            onClick={() => { displayChats(profile?.imageUrl, profile?.name)  }}
             key={index}
             className="m-2"
           >
@@ -97,11 +100,10 @@ export default function Chats() {
         </button>
       </div>
 
-      <div className={`bg-black sm:w-[75%] sm:my-2 mr-2 sm:flex sm:flex-col justify-between rounded-custom hidden border-custom p-2 ${isMobile ? "w-full flex flex-col" : "hidden sm:flex"}`}>
-        {username === "" && <NoActiveChatsPage />}
-        {username && (
-          <ActiveChatTopBar username={username} profileImage={profileImage} />
-        )}
+      <div className={`bg-black sm:w-[75%] sm:my-2 mr-2 sm:flex sm:flex-col justify-between rounded-custom hidden border-custom p-2 `}>
+        {!username && <NoActiveChatsPage />}
+        {username &&  <ActiveChatTopBar username={username} profileImage={profileImage} />
+        }
         {username && (
           <div className="w-full bg-black bg-dot-white/[0.2] relative flex items-center justify-center overflow-scroll p-2" />
         )}
