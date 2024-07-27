@@ -13,7 +13,7 @@ export default async function fetchChats(req: NextApiRequest, res: NextApiRespon
     const chats = await prisma.chat.findMany({
       where: {
         users: {
-          some: { id: session.user.id },
+          some: { id: session?.user?.id },
         },
       },
       include: {
@@ -26,6 +26,6 @@ export default async function fetchChats(req: NextApiRequest, res: NextApiRespon
 
     return res.status(200).json(chats);
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error?.message });
   }
 }

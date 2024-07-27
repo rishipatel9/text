@@ -16,9 +16,15 @@ const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const ws_1 = require("ws");
 const redis_1 = require("redis");
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
+app.use(express_1.default.urlencoded({ extended: true }));
+// app.use(cookieParser());
 const server = http_1.default.createServer(app);
 const wss = new ws_1.WebSocketServer({ server });
 const port = process.env.PORT || 4000;
@@ -28,10 +34,10 @@ const publisher = (0, redis_1.createClient)();
     try {
         yield publisher.connect();
         yield subscriber.connect();
-        console.log("Redis connected");
+        console.log('Redis connected');
     }
     catch (err) {
-        console.error("Failed to connect to Redis", err);
+        console.error('Failed to connect to Redis', err);
     }
 }))();
 wss.on('connection', (ws) => {
