@@ -1,0 +1,28 @@
+
+> @repo/ui@0.0.0 lint
+> eslint . --max-warnings 0
+
+[1G[0KWarning: React version not specified in eslint-plugin-react settings. See https://github.com/jsx-eslint/eslint-plugin-react#configuration .
+[0m[0m
+[0m[4m/Users/rishi/Project/text/packages/ui/src/button.tsx[24m[0m
+[0m  [2m13:5[22m  [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m[0m
+[0m[4m/Users/rishi/Project/text/packages/ui/src/card.tsx[24m[0m
+[0m  [2m13:5[22m   [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m  [2m19:7[22m   [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m  [2m20:17[22m  [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m  [2m22:7[22m   [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m[0m
+[0m[4m/Users/rishi/Project/text/packages/ui/src/code.tsx[24m[0m
+[0m  [2m8:10[22m  [31merror[39m  'React' must be in scope when using JSX  [2mreact/react-in-jsx-scope[22m[0m
+[0m[0m
+[0m[31m[1m✖ 6 problems (6 errors, 0 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m Lifecycle script `lint` failed with error:
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m [94mcode[39m [33m1[39m
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m [94mpath[39m /Users/rishi/Project/text/packages/ui
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m [94mworkspace[39m @repo/ui@0.0.0
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m [94mlocation[39m /Users/rishi/Project/text/packages/ui
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m command failed
+[1G[0K⠙[1G[0K[1mnpm[22m [31merror[39m [94mcommand[39m sh -c eslint . --max-warnings 0
+[1G[0K⠙[1G[0K

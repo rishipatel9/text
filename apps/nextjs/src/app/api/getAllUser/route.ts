@@ -1,10 +1,9 @@
-// pages/api/users.ts
-import {  NextApiResponse } from 'next';
+
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { NEXT_AUTH } from '@/lib/auth';
-import { getSession } from 'next-auth/react';
+
 
 
 export async function GET(req: NextRequest,res:NextResponse) {

@@ -4,18 +4,28 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
+    "lint": "prettier --check .",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "prepare": "husky && husky install"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.1.1",
+    "eslint": "^9.7.0",
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.8.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
     "prettier": "^3.2.5",
+    "prisma": "^5.17.0",
     "turbo": "^2.0.6",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.16.1"
   },
   "engines": {
     "node": ">=18"
   },
+  "husky": {},
   "packageManager": "npm@10.7.0",
   "workspaces": [
     "apps/*",

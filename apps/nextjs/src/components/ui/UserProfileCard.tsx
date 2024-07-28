@@ -1,7 +1,7 @@
 import React from "react";
 type UserProfileCardProps = {
-  imageUrl: string | null;
-  name: string | null;
+  imageUrl: string |null;
+  name: string |null;
 };
 const UserProfileCard: React.FC<UserProfileCardProps> = ({
   imageUrl,
@@ -22,8 +22,8 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         }}
       >
         <img
-          src={imageUrl}
-          alt={name}
+          src={imageUrl || ""}
+          alt={name || ""}
           className="h-12 w-12 rounded-full object-cover"
         />
       </div>
