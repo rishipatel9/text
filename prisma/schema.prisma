@@ -19,8 +19,7 @@ model User {
   messages     Message[] @relation("MessageSender")
   chats        Chat[]    @relation("ChatUsers")
   readMessages Message[] @relation("MessageReadBy")
-
-  Chat Chat[] @relation("ChatAdmin")
+  chatAdmin    Chat[]    @relation("ChatAdmin")
 }
 
 model Chat {
