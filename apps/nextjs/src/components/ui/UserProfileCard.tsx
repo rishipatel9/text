@@ -1,7 +1,7 @@
 import React from "react";
 type UserProfileCardProps = {
-  imageUrl: string |null;
-  name: string |null;
+  imageUrl: string | null;
+  name: string | null;
 };
 const UserProfileCard: React.FC<UserProfileCardProps> = ({
   imageUrl,

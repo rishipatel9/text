@@ -2,6 +2,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import prisma from "./prisma";
 import { sendEmail } from "@/utils/email";
+import { toast } from "react-toastify";
 
 const NEXT_AUTH = {
   providers: [
@@ -17,58 +18,88 @@ const NEXT_AUTH = {
   secret: process.env.NEXT_SECRET,
   pages: {
     signIn: "/signin",
+    error: "/auth/error", // Custom error page
   },
   callbacks: {
     async session({ session, token }: { session: any; token: any }) {
-      if (token?.id) {
-        session.user.id = token.id;
+      const userExists = await prisma.user.findFirst({
+        where: {
+          email: session.user.email,
+        },
+      });
+
+      if (userExists && userExists.provider !== token.provider) {
+        throw new Error(
+          `You have previously signed in with ${userExists.provider}. Please use ${userExists.provider} to sign in.`,
+        );
       }
+
+      session.user.id = token.id;
+      session.user.provider = token.provider;
       return session;
     },
-    async jwt({ token, user }: { token: any; user: any }) {
+    async jwt({
+      token,
+      account,
+      user,
+    }: {
+      token: any;
+      account: any;
+      user: any;
+    }) {
       if (user) {
         token.id = user.id;
+        token.provider = account.provider;
       }
       return token;
     },
   },
   events: {
-    async signIn({ user, account }: { user: any; account: any }) {
-      // console.log("SignIn event triggered");
-      // console.log("User:", user);
-      // console.log("Account:", account);
+    async signIn({ user, account }: { account: any; user: any }) {
       try {
-        const ifExists = await prisma.user.findFirst({
-          where: {
-            email: user.email,
-          },
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
         });
-        if (!ifExists) {
-          await sendWelcomeEmail(user);
-          console.log("Welcome email sent");
+
+        if (existingUser && existingUser.provider !== account.provider) {
+          toast.error(
+            `You have previously signed in with ${existingUser.provider}. Please use ${existingUser.provider} to sign in.`,
+          );
+          throw new Error(
+            `You have previously signed in with ${existingUser.provider}. Please use ${existingUser.provider} to sign in.`,
+          );
+        }
+
+        if (!existingUser) {
+          await sendWelcomeEmail({ user });
           await prisma.user.create({
             data: {
-              email: user.email || "",
-              name: user.name || "",
-              image: user.image || "",
+              email: user.email,
+              name: user.name,
+              image: user.image,
               provider: account.provider,
               providerId: account.providerAccountId,
             },
           });
-          console.log("User created successfully");
         }
       } catch (error) {
-        console.error("Error creating user : ", error);
+        console.error("Error during sign-in: ", error);
       }
     },
   },
 };
-async function sendWelcomeEmail(user: any) {
+
+interface user {
+  email: string;
+  name: string;
+}
+async function sendWelcomeEmail({ user }: { user: user }) {
   const { email, name } = user;
   const subject = "Welcome to Our Service!";
-  const text = `Hello ${name},\n\nWelcome to our service! We are glad to have you on board.\n\nBest regards,\nThe Team`;
-  const html = `<p>Hello ${name},</p><p>Welcome to our service! We are glad to have you on board.</p><p>Best regards,<br>The Team</p>`;
+  const text = `Hello ${name},\n\nWelcome to our text.! We are glad to have you on board.\n\nBest regards,\nThe Team`;
+  const html = `<p>Hello ${name},</p><p>Welcome to our text.! We are glad to have you on board.</p><p>Best regards,<br>text. team</p>`;
 
   await sendEmail({ to: email, subject, text, html });
 }
+
 export { NEXT_AUTH };
