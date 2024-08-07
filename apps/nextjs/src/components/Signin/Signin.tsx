@@ -30,7 +30,7 @@ export function SignupFormDemo() {
     <div className="h-[100vh] w-full bg-black bg-grid-white/[0.2]  relative flex items-center justify-center overflow-hidden">
       <div className="absolute pointer-events-none inset-0 flex items-center justify- bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
       <div className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8">
-        <div className="max-w-md w-full mx-auto rounded-xl md:rounded-2xl md:p-8  ">
+        <div className="max-w-md w-full mx-auto rounded-xl md:rounded-2xl md:p-8 px-10  ">
           <BorderBeam />
           <BlurIn
             word=" Welcome to text."
@@ -45,7 +45,7 @@ export function SignupFormDemo() {
 
           <div className="flex flex-col justify-center items-center space-y-4">
             <button
-              className="relative group/btn flex space-x-2 sm:w-full items-center justify-center px-4 w-[90%] text-black rounded-md h-10 font-medium shadow-input  bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)] border-custom "
+              className="relative group/btn flex space-x-2 sm:w-full items-center justify-center px-4 w-[120%] text-black rounded-md h-10 font-medium shadow-input  bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)] border-custom "
               onClick={() => handleSignIn("google")}
             >
               <IconBrandGoogle className="h-4 w-4  text-neutral-300" />
@@ -53,7 +53,7 @@ export function SignupFormDemo() {
               <BottomGradient />
             </button>
             <button
-              className="relative group/btn flex space-x-2 items-center justify-center px-4 sm:w-full w-[90%] text-black rounded-md h-10 font-medium shadow-input  bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)] border-custom"
+              className="relative group/btn flex space-x-2 items-center justify-center px-4 sm:w-full w-[120%] text-black rounded-md h-10 font-medium shadow-input  bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)] border-custom"
               onClick={() => handleSignIn("github")}
             >
               <IconBrandGithub className="h-4 w-4  text-neutral-300" />

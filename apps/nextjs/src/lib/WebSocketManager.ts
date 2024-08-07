@@ -8,42 +8,36 @@ class WebSocketManager {
   private initialized: boolean = false;
   private messageHandlers: Set<MessageHandler>;
 
-  private constructor() {
-    this.ws = new WebSocket(wsUrl);
+  private constructor(private signalingString?: string) {
+    this.ws = new WebSocket(signalingString || wsUrl);
     this.messageHandlers = new Set();
-    this.initialized = true;
     this.init();
   }
 
   public static getInstance(): WebSocketManager {
-    if (!WebSocketManager.instance) {
-      WebSocketManager.instance = new WebSocketManager();
+    if (!this.instance) {
+      this.instance = new WebSocketManager(wsUrl);
     }
-    return WebSocketManager.instance;
+    return this.instance;
   }
   init() {
     this.ws.onopen = () => {
+      console.log("ws Connected :WebSocketManager");
       this.initialized = true;
     };
     this.ws.onmessage = (event) => {
-      console.log(event);
+      console.log(event?.data);
     };
   }
 
-  public sendMessage(message: object): void {
+  sendMessage(message: object): void {
+    // console.log(`Message to send : ${message}`);
+
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
       console.warn("WebSocket is not open. Unable to send message.");
     }
-  }
-
-  public addMessageHandler(handler: MessageHandler): void {
-    this.messageHandlers.add(handler);
-  }
-
-  public removeMessageHandler(handler: MessageHandler): void {
-    this.messageHandlers.delete(handler);
   }
 }
 

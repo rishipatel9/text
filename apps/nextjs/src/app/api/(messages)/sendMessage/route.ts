@@ -1,11 +1,14 @@
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { NEXT_AUTH } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { NEXT_AUTH } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  if (req.method !== 'POST') {
-    return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
+  if (req.method !== "POST") {
+    return NextResponse.json(
+      { message: "Method not allowed" },
+      { status: 405 },
+    );
   }
 
   const session = await getServerSession(NEXT_AUTH);
@@ -13,7 +16,10 @@ export async function POST(req: NextRequest) {
   const { content, chatId } = data;
 
   if (!session || !content || !chatId) {
-    return NextResponse.json({ message: 'Invalid data passed into request' }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid data passed into request" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -25,7 +31,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!chat) {
-      return NextResponse.json({ message: 'Chat not found' }, { status: 404 });
+      return NextResponse.json({ message: "Chat not found" }, { status: 404 });
     }
 
     const user = await prisma.user.findUnique({
@@ -35,7 +41,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     const newMessage = await prisma.message.create({
@@ -53,7 +59,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newMessage, { status: 200 });
   } catch (error) {
-    console.error('Error creating message:', error);
-    return NextResponse.json({ message: 'An error occurred', error: error }, { status: 500 });
+    console.error("Error creating message:", error);
+    return NextResponse.json(
+      { message: "An error occurred", error: error },
+      { status: 500 },
+    );
   }
 }
