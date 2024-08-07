@@ -5,7 +5,8 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-
+.turbo
+/dist
 # testing
 /coverage
 

@@ -2,17 +2,19 @@ import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import { createClient } from 'redis';
-import { PrismaClient } from '@prisma/client';
-import cors from "cors";
+import axios from 'axios';
+import cors from 'cors';
 const app = express();
 
 app.use(express.json());
-app.use(cors({
-    origin:"http://localhost:3000",
-    credentials:true
-}))
-app.use(express.urlencoded({ extended: true}));
-// app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.BASE_URL,
+    credentials: true,
+  })
+);
+app.use(express.urlencoded({ extended: true }));
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 const port = process.env.PORT || 4000;
@@ -29,29 +31,43 @@ const publisher = createClient();
   }
 })();
 
+
 wss.on('connection', (ws) => {
   console.log('New Client Connection');
+  
 
   ws.on('message', async (message: string) => {
-    const data = JSON.parse(message);
-    if (data.type === 'SUBSCRIBE') {
-      const { channel } = data;
-      await subscriber.SUBSCRIBE(channel, async (message) => {
-        console.log(`Recievd message ${message} on ${channel}`);
-        ws.send(message);
-      });
-    } else if (data.type === 'PUBLISH') {
-      const { channel, message } = data;
-      await publisher.PUBLISH(channel, message);
-      console.log(`PUBLISHED ${message} TO ${channel}`);
-    } else if (data.type === 'UNSUBSCRIBE') {
-      
-      const { channel } = data;
-      await subscriber.UNSUBSCRIBE(channel);
-      console.log(`UBSUBSCRIBED ${channel}`);
-    } else {
-      console.log(data);
+    let Data=JSON.parse(message);
+    console.log(Data);
+    if(Data.type==='SUBSCRIBE'){
+      console.log("inside subscribe");
+      for (let chatId of Data.chatIds) {
+        chatId = chatId.toString(); 
+        console.log(`SUBSCRIBED TO: ${chatId}`);
+        await subscriber.subscribe(chatId, async (message) => {
+          console.log(`Message received on channel ${chatId}:`, message);
+          ws.send(JSON.stringify({
+            channel: chatId,
+            message: message
+          }))
+        });
+      }
     }
+    else if(Data.type==='PUBLISH'){
+        const chatId=(Data.chatId).toString()
+        const message=Data.message
+        console.log(message);
+        console.log(chatId);
+        await publisher.publish(chatId,message);
+        console.log("published");
+        
+    }
+    
+    // wss.clients.forEach((client) => {
+    //   if (client.readyState === WebSocket.OPEN) {
+    //     client.send(Data);
+    //   }
+    // });
   });
   ws.on('close', () => {
     console.log('Client disconnected');
