@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 type UserProfileCardProps = {
   imageUrl: string | null;
@@ -21,10 +22,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
           console.log(name);
         }}
       >
-        <img
+        <Image
           src={imageUrl || ""}
           alt={name || ""}
           className="h-12 w-12 rounded-full object-cover"
+          width={48}
+          height={48}
         />
       </div>
     </div>

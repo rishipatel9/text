@@ -10,7 +10,7 @@ export function useSessionData() {
     if (!session) {
       router.push("/signin");
     }
-  }, [session, status]);
+  }, [session, status, router]);
 
   return { session, status };
 }

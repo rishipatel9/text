@@ -63,11 +63,6 @@ wss.on('connection', (ws) => {
         
     }
     
-    // wss.clients.forEach((client) => {
-    //   if (client.readyState === WebSocket.OPEN) {
-    //     client.send(Data);
-    //   }
-    // });
   });
   ws.on('close', () => {
     console.log('Client disconnected');

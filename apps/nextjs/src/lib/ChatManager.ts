@@ -43,6 +43,7 @@ export class ChatManager {
       setChatRoom(res.data.id);
       this.setFetching(true);
       res = await axios.post("/api/getAllMessages", { chatId: res.data.id });
+      console.log(res.data);
       this.setMessages(
         res.data.map((msg: any) => ({
           user: msg.sender.name,

@@ -5,14 +5,13 @@ import { BorderBeam } from "../magicui/border-beam";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import BlurIn from "../magicui/blur-in";
-import { toast } from "react-toastify";
 
 export function SignupFormDemo() {
   const { data: session, status } = useSession();
   const router = useRouter();
   useEffect(() => {
     if (session) router.push("/");
-  }, [session, status]);
+  }, [session, status, router]);
 
   const handleSignIn = async (provider: any) => {
     try {
