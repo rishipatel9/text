@@ -2,8 +2,8 @@ import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import { createClient } from 'redis';
-import axios from 'axios';
 import cors from 'cors';
+
 const app = express();
 
 app.use(express.json());
@@ -31,39 +31,37 @@ const publisher = createClient();
   }
 })();
 
-
 wss.on('connection', (ws) => {
   console.log('New Client Connection');
-  
 
   ws.on('message', async (message: string) => {
-    let Data=JSON.parse(message);
-    console.log(Data);
-    if(Data.type==='SUBSCRIBE'){
-      console.log("inside subscribe");
-      for (let chatId of Data.chatIds) {
-        chatId = chatId.toString(); 
-        console.log(`SUBSCRIBED TO: ${chatId}`);
-        await subscriber.subscribe(chatId, async (message) => {
-          console.log(`Message received on channel ${chatId}:`, message);
-          ws.send(JSON.stringify({
-            channel: chatId,
-            message: message
-          }))
-        });
-      }
-    }
-    else if(Data.type==='PUBLISH'){
-        const chatId=(Data.chatId).toString()
-        const message=Data.message
-        console.log(message);
-        console.log(chatId);
-        await publisher.publish(chatId,message);
+    try {
+      let Data = JSON.parse(message);
+      console.log(Data);
+
+      if (Data.type === 'SUBSCRIBE') {
+        for (let chatId of Data.chatIds) {
+          chatId = chatId.toString();
+          await subscriber.subscribe(chatId, (message) => {
+            console.log(`Message received on channel ${chatId}:`, message);
+            ws.send(JSON.stringify({
+              channel: chatId,
+              message: message,
+              user: Data.user,
+            }));
+          });
+        }
+      } else if (Data.type === 'PUBLISH') {
+        console.log("from publish at 57:", Data);
+        const chatId = Data.chatId.toString();
+        await publisher.publish(chatId, JSON.stringify(Data));
         console.log("published");
-        
+      }
+    } catch (err) {
+      console.error('Error handling message:', err);
     }
-    
   });
+
   ws.on('close', () => {
     console.log('Client disconnected');
   });
